@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import os
 import re
+import string
 
 #create_frequency_dict can't handle keywords with characters like
 #+, *, or ? that have special meanings in regex
@@ -13,6 +14,30 @@ def get_keywords(filename):
   for line in f:
     keywords.append(line.strip())
   return keywords
+
+extra_stops = ['code', 'planned', 'learn', 'learned', 'learning', 'will', 'continue', 'time', "i'm", 'today', 'tomorrow', 'yesterday']
+
+def generate_popular(reflections_mapping, extra_stops):
+  '''input: mapping of names to reflections text
+  output: list of top 50 popular 'key' words'''
+  word_bucket = {}
+  file = open('stopword.txt', 'r')
+  dump = file.read()
+  file.close()
+  stopwords = dump.split()
+  for person in reflections_mapping:
+    words = reflections_mapping[person].strip().lower().split()
+    for word in words:
+      wordy = word.strip(string.punctuation+string.whitespace)
+      if stopwords.count(wordy) == 0:
+        if wordy in word_bucket:
+          word_bucket[wordy] += 1
+        else:
+          word_bucket[wordy] = 1
+  sorted = word_bucket.items()
+  sorted.sort(key=lambda x: x[1])
+  sorted.reverse()
+  return sorted[0:50]
 
 def get_file_names(dir_path):
   '''input: path to directory

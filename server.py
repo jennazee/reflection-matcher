@@ -1,12 +1,17 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request
 from pymongo import Connection
 import json
 import os
+import re
+
+import reflection_scraper
 
 app = Flask(__name__)
 connection = Connection()
 db = connection.reflections
 collection = db.words
+
+reflections_dict = {}
 
 @app.route('/')
 def start():
@@ -15,7 +20,7 @@ def start():
 #How do we return an icon???
 @app.route('/favicon.ico')
 def get_icon():
-	return send_from_directory(os.path.join(app.root_path, 'static'), 'pw.ico')
+	return
 
 @app.route('/<name>', methods=["GET"])
 	#create match_data to return as json object for display
@@ -27,19 +32,13 @@ def get_icon():
 	#described above.
 
 def get_JSON(name):
-
-	print "got request for " + name
-	
 	match_data = {}
 
 	match_data['name'] = name
 	match_data['children'] = []
 
 	doc = collection.find_one({'name':name})
-	print "name: " + name
 	my_keywords = doc['keywords'].keys()
-
-	kw_matches_by_name = {}
 
 	for keyword in my_keywords:
 		word_data = {}
@@ -50,10 +49,8 @@ def get_JSON(name):
 		match_docs = collection.find({'keywords.'+keyword:{'$exists':True}}).sort('keywords.'+keyword, -1)
 	
 		for match_doc in match_docs[:10]:
-			match_name = match_doc['name']
-			if match_name != name:
-				match_names.append(match_name)
-				kw_matches_by_name[match_name] = kw_matches_by_name.get(match_name, 0) + 1
+			if match_doc['name'] != name:
+				match_names.append(match_doc['name'])
 
 		for person in match_names:
 			# INCLUDE TO CONCEAL LAST NAMES
@@ -70,12 +67,25 @@ def get_JSON(name):
 
 		match_data['children'].append(word_data)
 
-	match_data['top'] = max(kw_matches_by_name, key=kw_matches_by_name.get)
-
 	return json.dumps(match_data)
+
+@app.route('/<name>/<term>')
+def get_mentions(name, term):
+	global reflections_dict
+	if len(reflections_dict) == 0:
+		reflections_dict = get_ref_dict(name, term)
+	print reflections_dict
+	places = [m.start() for m in re.finditer(term, reflections_dict[name])]
+	snippets = []
+	for loc in places:
+		snippets.append(['...' + reflections_dict[name][loc-100:loc+100] + '...'])
+	return json.dumps(snippets)
+
+def get_ref_dict(name, term):
+	return reflection_scraper.scrape_reflections(reflection_scraper.get_reflections(reflection_scraper.get_file_names('html/')))
 	
 if __name__ == '__main__':
-	port = int(os.environ.get('PORT', 5000))
-	app.run(host='0.0.0.0', port=port)
+	port = int(os.environ.get('PORT', 5757))
+	app.run(debug=True)
 
 

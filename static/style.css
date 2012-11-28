@@ -12,14 +12,6 @@ h1 {
 	letter-spacing: -1px;
 }
 
-h2 {
-	font-family: 'Arbutus Slab', serif;
-	font-size: 24px;
-	text-align: center;
- 	color: #574D37;
- 	letter-spacing: -1px;
-}
-
 form {
 	text-align: center;
 }
@@ -27,7 +19,7 @@ form {
 label {
 	font-family: 'Arbutus Slab', serif;
 	font-size: 18px;
-	color: #F82CBF;
+	color: #F93;
 }
 
 circle {
@@ -43,11 +35,10 @@ circle {
 }
 
 #submit {
-	background-color: #F82CBF;
+	background-color: #F93;
 	padding: 5px;
 	color: white;
 	font-size: 14px;
-	border: none;
 }
 
 .gallery {
@@ -65,4 +56,42 @@ circle {
 	font-size: 14px;
 	letter-spacing: 1px;
 	color: #574D37;
+}
+
+.tooltip {
+	position: absolute;
+	background-color: white;
+	padding: 5px;
+	border-radius: 10px;
+	box-shadow: 0 0 15px 5px #E3E3E3;
+	width: 300px;
+	
+}
+
+.close{
+	width:15px;
+	height:15px;
+	border-radius:50px;
+	font-size:.75em;
+	font-family: sans-serif;
+	color: white;
+	text-align:center;
+	text-decoration:none;
+	background:red;
+	display: inline-block;
+	margin: 5px;
+	float: left;
+}
+
+.close:hover {
+	background-color: rgb(175,10,10);
+	cursor: pointer;
+}
+
+.hidden {
+	display: none;
+}
+
+.not-option {
+	color: #999;
 }
